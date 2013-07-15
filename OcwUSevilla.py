@@ -112,23 +112,30 @@ for page in pages:
         print OCW['Material']['Url']
     #for i in OCW.keys():
         #print ">>",i," - ", OCW[i]
+        
+    readPage = urlopen(OCW['Material']['Url']).read()       #Leer pagina de Materiales del Curso
+    soupMat = BeautifulSoup(readPage)                       #crear estructura BS4
+    cont = soupMat.select('div#region-content div.plain p')   #busca id que contien OERs dentro
     
-    """print OCW['url']
-    print OCW['Material']['Url']
-    
-    if OCW['Material']['Url'] != "" and OCW['Material']['Url'] != OCW['url']:
-        readPage = urlopen(OCW['Material']['Url']).read()       #Leer pagina de Materiales del Curso
-        soupMat = BeautifulSoup(readPage)                       #crear estructura BS4
-         cont = soupMat.select('#content-core #parent-fieldname-text')   #busca id que contien OERs dentro
-        lis = cont[0].find_all('li')                            #busca etiquetas li 
-        for i in lis:  
-            Oer['Text']=i.get_text()
-            if i.a != None:
-                Oer['UrlOer']=i.a.get('href')
+    for p in cont:
+        print OCW['Material']['Url']
+        print p
+        aa = p.select_all('a')
+        print aa
+        for a in aa:
+            Oer['UrlOer']=a.get('href')
+            Oer['Text']=a.get_text()
             OCW['Material']['ListOERs'].append(Oer)
-            Oer = {'Text':"",'UrlOer':""}     
+            Oer = {'Text':"",'UrlOer':""}   
+            
+    
+    #print page 
+    #print cont
+    """Oer['UrlOer']=a.get('href')
+            OCW['Material']['ListOERs'].append(Oer)
+            Oer = {'Text':"",'UrlOer':""}     """
             
         
 
     for i in OCW['Material']['ListOERs']:
-        print i['Text'], " > ",i['UrlOer']"""
+        print i['Text'], " > ",i['UrlOer']
