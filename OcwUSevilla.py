@@ -11,6 +11,12 @@ DesArea = ["Área", "Area", "AREA", "ÁREA"]
 DesFacu = ["Facultad", "facultad","Escuela","escuela"]
 DesDate = ["fecha","Fecha"]
 
+def QuitaSalto(cadena):
+    print "cadena: ",cadena
+    if cadena != None and len(cadena) > 0:
+        if (cadena[0] == '\n'): 
+            cadena = cadena[1:]
+    return cadena
 
 def analiza(cadena):
     #print len(cadena)," ", cadena
@@ -115,27 +121,15 @@ for page in pages:
         
     readPage = urlopen(OCW['Material']['Url']).read()       #Leer pagina de Materiales del Curso
     soupMat = BeautifulSoup(readPage)                       #crear estructura BS4
-    cont = soupMat.select('div#region-content div.plain p')   #busca id que contien OERs dentro
-    
-    for p in cont:
-        print OCW['Material']['Url']
-        print p
-        aa = p.select_all('a')
-        print aa
-        for a in aa:
-            Oer['UrlOer']=a.get('href')
-            Oer['Text']=a.get_text()
-            OCW['Material']['ListOERs'].append(Oer)
-            Oer = {'Text':"",'UrlOer':""}   
-            
-    
-    #print page 
-    #print cont
-    """Oer['UrlOer']=a.get('href')
-            OCW['Material']['ListOERs'].append(Oer)
-            Oer = {'Text':"",'UrlOer':""}     """
-            
-        
+    cont = soupMat.select('div#region-content div.plain')   #busca OERs dentro
+    print OCW['Material']['Url']
+    aa = cont[0].select('a')
+    for a in aa:
+        print a
+        Oer['UrlOer']=QuitaSalto(a.get('href'))
+        Oer['Text']=QuitaSalto(a.get_text())
+        OCW['Material']['ListOERs'].append(Oer)
+        Oer = {'Text':"",'UrlOer':""}   
 
     for i in OCW['Material']['ListOERs']:
-        print i['Text'], " > ",i['UrlOer']
+        print "> ",i['Text'], " : ",i['UrlOer']
