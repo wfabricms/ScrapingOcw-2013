@@ -12,7 +12,7 @@ DesFacu = ["Facultad", "facultad","Escuela","escuela"]
 DesDate = ["fecha","Fecha"]
 
 def QuitaSalto(cadena):
-    print "cadena: ",cadena
+    #print "cadena: ",cadena
     if cadena != None and len(cadena) > 0:
         if (cadena[0] == '\n'): 
             cadena = cadena[1:]
@@ -126,14 +126,15 @@ for page in pages:
     aa = cont[0].select('a')
     latestOer = ""
     for a in aa:
-        print a
+        #print a
         if latestOer != "" and latestOer == a.get('href'):
-            
-
-        Oer['UrlOer']=QuitaSalto(a.get('href'))
-        Oer['Text']=QuitaSalto(a.get_text())
-        OCW['Material']['ListOERs'].append(Oer)
-        Oer = {'Text':"",'UrlOer':""}   
+            OCW['Material']['ListOERs'][len(OCW['Material']['ListOERs'])-1]['Text'] = QuitaSalto(a.get_text())
+        else:
+            Oer['UrlOer']=QuitaSalto(a.get('href'))
+            Oer['Text']=QuitaSalto(a.get_text())
+            OCW['Material']['ListOERs'].append(Oer)
+            Oer = {'Text':"",'UrlOer':""} 
+        latestOer = a.get('href')
 
     for i in OCW['Material']['ListOERs']:
         print "> ",i['Text'], " : ",i['UrlOer']
