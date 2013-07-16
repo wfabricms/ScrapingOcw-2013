@@ -124,8 +124,12 @@ for page in pages:
     cont = soupMat.select('div#region-content div.plain')   #busca OERs dentro
     print OCW['Material']['Url']
     aa = cont[0].select('a')
+    latestOer = ""
     for a in aa:
         print a
+        if latestOer != "" and latestOer == a.get('href'):
+            
+
         Oer['UrlOer']=QuitaSalto(a.get('href'))
         Oer['Text']=QuitaSalto(a.get_text())
         OCW['Material']['ListOERs'].append(Oer)
