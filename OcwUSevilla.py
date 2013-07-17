@@ -5,11 +5,12 @@ from urllib import urlopen
 import re
 from URLs import *
 
-#Descripciones de la categorías en las páginas
+#Ambiguedades comunes de los valores 
 DesDpto = ["Dpto", "dpto", "Departamento", "departamento", "epartment"]
 DesArea = ["Área", "Area", "AREA", "ÁREA"]
-DesFacu = ["Facultad", "facultad","Escuela","escuela"]
+DesFacu = ["Facultad", "facultad"]
 DesDate = ["fecha","Fecha"]
+DesScho = ["Escuela","ETS"]
 
 def QuitaSalto(cadena):
     #print "cadena: ",cadena
@@ -36,28 +37,29 @@ def analiza(cadena):
 
         for d in DesFacu:
             if d in cadena:
-                OCW['Facultad'] = cadena
+                OCW['Faculty'] = cadena
                 return True
 
         for d in DesDate:
             if d in cadena:
                 OCW['Date'] = cadena
+                return True
+        for d in DesScho:
+            if d in cadena:
+                OCW['School'] = cadena
                 return True    
     return False
        
 #Host
 host = "" #"http://localhost/ocw/" degree
-
 #paginas web
 pages = pagesUSevilla
 pagasaux = ['']
 for page in pages:    
-    # print  "\n"
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
     ListaOcw = []
-        
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
-    OCW = {'url':"",'urlStatus':True,'Department':[],'Autor':[],'Area':[],'Facultad':"",'UrlPrograma':[],'Material':{'Url':"",'ListOERs':[]},'Date':"",'ExtraData':[]}
+    OCW = {'url':"",'urlStatus':True,'Department':[],'Autor':[],'School':"",'Area':[],'Faculty':"",'UrlProgram':"",'Material':{'Url':"",'ListOERs':[]},'Date':"",'ExtraData':[]}
     
     Oer = {'Text':"",'UrlOer':""}           #Diccionario de la lista OCW['Material']['ListOERs'] 
     
@@ -80,15 +82,9 @@ for page in pages:
         OCW['Autor'].append(aut[:(aut.index(','))])
         aut = aut[(aut.index(',')+2):]
     OCW['Autor'].append(aut) 
-    
-    #for i in OCW['Autor']: 
-    #    print ">>",i
-       
     data = soup.select('#aboutDeptInfo p')
-    #print "DATA", data   
     if data == []:
         data = soup.select('#aboutInfo p')   
-    #print page 
     for i in data:
         textp = i.get_text()
         index = 0
@@ -100,33 +96,18 @@ for page in pages:
 
         if analiza(textp) != True:
                 OCW['ExtraData'].append(textp)
-    
-    #Scrap URL Programa - Programme 
-    for i in soup.select('dl#portlet-simple-nav dd.portletItem a[href="Programa"]'):
-        OCW['UrlPrograma'] = i.get('href')
-    for i in soup.select('dl#portlet-simple-nav dd.portletItem a[href="Programme"]'): #Ingles
-        OCW['UrlPrograma'] = i.get('href')
-    
-    #Scrap URL Material
+    #Scrap URL Material y URL Programa
     for i in soup.select('div#portlet-eduCommonsNavigation a'):
         if "Material de clase" in i.get_text() or "Material del curso" in i.get_text() or "Material de Clase" in i.get_text():
-            #print "Material - ", i
             OCW['Material']['Url'] = i.get('href')
-
-    if (OCW['Material']['Url'] == ""):
-        print page
-        print OCW['Material']['Url']
-    #for i in OCW.keys():
-        #print ">>",i," - ", OCW[i]
-        
+        if "Programa" in i.get_text():
+            OCW['UrlProgram'] = i.get('href')
     readPage = urlopen(OCW['Material']['Url']).read()       #Leer pagina de Materiales del Curso
     soupMat = BeautifulSoup(readPage)                       #crear estructura BS4
     cont = soupMat.select('div#region-content div.plain')   #busca OERs dentro
-    print OCW['Material']['Url']
     aa = cont[0].select('a')
     latestOer = ""
     for a in aa:
-        #print a
         if latestOer != "" and latestOer == a.get('href'):
             OCW['Material']['ListOERs'][len(OCW['Material']['ListOERs'])-1]['Text'] = QuitaSalto(a.get_text())
         else:
@@ -136,5 +117,19 @@ for page in pages:
             Oer = {'Text':"",'UrlOer':""} 
         latestOer = a.get('href')
 
-    for i in OCW['Material']['ListOERs']:
-        print "> ",i['Text'], " : ",i['UrlOer']
+    #IMPRIMIR
+    print OCW['url']
+    for d in OCW['Department']:
+        print d
+    for autor in OCW['Autor']:
+        print autor
+    print OCW['School']
+    for area in OCW['Area']:
+        print area 
+    print OCW['Faculty']
+    print OCW['UrlProgram']
+    print OCW['Material']['Url']
+    for mat in OCW['Material']['ListOERs']:
+        print mat
+    print OCW['Date']
+
