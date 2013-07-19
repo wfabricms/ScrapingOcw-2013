@@ -12,32 +12,42 @@ DesFacu = ["Facultad", "facultad"]
 DesDate = ["fecha","Fecha"]
 DesScho = ["Escuela","ETS"]
 
+def CompruebaOer(UrlOer, ListOERs ):
+    if len(UrlOer) < 3:
+        return False
+
+    for ind in ListOERs:
+        if UrlOer == ind['UrlOer']:
+            return False
+    return True
+
 def QuitaSalto(cadena):
-    #print "cadena: ",cadena
     if cadena != None and len(cadena) > 0:
-        if (cadena[0] == '\n'): 
-            cadena = cadena[1:]
+        #if (cadena[0] == '\n'): 
+            #cadena = cadena[1:]
+        while '\n' in cadena:
+            cadena = cadena[:(cadena.index('\n'))] + cadena[(cadena.index('\n'))+1:]
+
     return cadena
 
 def analiza(cadena):
-    #print len(cadena)," ", cadena
     if len(cadena) > 0:
         if (cadena[0] == '\n'): 
             cadena == cadena[1:]
 
         for d in DesDpto:
             if d in cadena:
-                OCW['Department'] = cadena
+                OCW['Department'].append(cadena)
                 return True
             
         for d in DesArea:
             if d in cadena.encode("utf-8"):
-                OCW['Area'] = cadena
+                OCW['Area'].append(cadena)
                 return True   
 
         for d in DesFacu:
             if d in cadena:
-                OCW['Faculty'] = cadena
+                OCW['Faculty'].append(cadena)
                 return True
 
         for d in DesDate:
@@ -46,7 +56,7 @@ def analiza(cadena):
                 return True
         for d in DesScho:
             if d in cadena:
-                OCW['School'] = cadena
+                OCW['School'].append(cadena)
                 return True    
     return False
        
@@ -59,7 +69,7 @@ for page in pages:
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
     ListaOcw = []
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
-    OCW = {'url':"",'urlStatus':True,'Department':[],'Autor':[],'School':"",'Area':[],'Faculty':"",'UrlProgram':"",'Material':{'Url':"",'ListOERs':[]},'Date':"",'ExtraData':[]}
+    OCW = {'url':"",'urlStatus':True,'Department':[],'Autor':[],'School':[],'Area':[],'Faculty':[],'UrlProgram':"",'Material':{'Url':"",'ListOERs':[]},'Date':"",'ExtraData':[]}
     
     Oer = {'Text':"",'UrlOer':""}           #Diccionario de la lista OCW['Material']['ListOERs'] 
     
@@ -118,18 +128,25 @@ for page in pages:
         latestOer = a.get('href')
 
     #IMPRIMIR
-    print OCW['url']
-    for d in OCW['Department']:
-        print d
+    print "> ",OCW['url']
+    """for d in OCW['Department']:
+        print "> ",d
     for autor in OCW['Autor']:
-        print autor
-    print OCW['School']
+        print "> ",QuitaSalto(autor)
+    for s in OCW['School']:
+        print "> ",s 
     for area in OCW['Area']:
-        print area 
-    print OCW['Faculty']
-    print OCW['UrlProgram']
-    print OCW['Material']['Url']
+        print "> ",area 
+    for f in OCW['Faculty']:
+        print "> ",f 
+    print "> ",OCW['UrlProgram']
+    print "> ",OCW['Material']['Url']
+    print "> ",OCW['Date']
     for mat in OCW['Material']['ListOERs']:
-        print mat
-    print OCW['Date']
+        for ind in mat:
+            print ind , ": ", mat[ind]"""
+
+
+    for ind in OCW['ExtraData']:
+        print "> ",ind
 
