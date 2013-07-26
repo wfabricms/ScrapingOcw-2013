@@ -6,27 +6,34 @@ import re
 from URLs import *
 
 #Ambiguedades comunes de los valores 
-DesDpto = ["Dpto", "dpto", "Departamento", "departamento", "epartment"]
+DesDpto = ["Dpto", "dpto", "Departamento", "departamento", "epartment", "epartamiento"]
 DesArea = ["Área", "Area", "AREA", "ÁREA"]
 DesFacu = ["Facultad", "facultad"]
 DesDate = ["fecha","Fecha"]
 DesScho = ["Escuela","ETS"]
 
 def CompruebaOer(UrlOer, ListOERs ):
-    if len(UrlOer) < 3:
-        return False
+    if UrlOer == None or len(UrlOer) < 3:
+        return False    #DEVUELVE FASO EN CASO DE QUE EL OER SEA MUY CORTO EN TASL COSO NO ES UN LINK
 
     for ind in ListOERs:
         if UrlOer == ind['UrlOer']:
-            return False
-    return True
+            return False # DEVUELVE FALSO EN CASO DE QUE EL OER YA EXISTA EN TAL CASO NO SE INSERTA
+    return True #DEVUELVE FALSO EN CASO DE QUE EL OER NO EXISTA EN LISTA PARA SER INSERTADO
 
-def QuitaSalto(cadena):
+def LimpiaText(cadena):
     if cadena != None and len(cadena) > 0:
-        #if (cadena[0] == '\n'): 
-            #cadena = cadena[1:]
         while '\n' in cadena:
             cadena = cadena[:(cadena.index('\n'))] + cadena[(cadena.index('\n'))+1:]
+        
+        while '  ' in cadena:
+            cadena = cadena[:(cadena.index('  '))] + cadena[(cadena.index('  '))+1:]
+        
+        if ' ' in cadena[0] or '\n' in cadena[0]:
+            cadena = cadena[1:]
+        
+        if ' ' in cadena[len(cadena)-1] or '\n' in cadena[len(cadena)-1]:
+            cadena = cadena[:-1] 
 
     return cadena
 
@@ -61,15 +68,15 @@ def analiza(cadena):
     return False
        
 #Host
-host = "" #"http://localhost/ocw/" degree
+host = "" #"http://localhost/ocw/" 
 #paginas web
 pages = pagesUSevilla
-pagasaux = ['']
-for page in pages:    
+pagasaux = ['http://ocwus.us.es/arquitectura-e-ingenieria/experimentacion-en-quimica-i/Course_listing']
+for page in pagasaux:    
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
     ListaOcw = []
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
-    OCW = {'url':"",'urlStatus':True,'Department':[],'Autor':[],'School':[],'Area':[],'Faculty':[],'UrlProgram':"",'Material':{'Url':"",'ListOERs':[]},'Date':"",'ExtraData':[]}
+    OCW = {'url':"",'urlStatus':True,'Title':"" ,'Department':[],'Autor':[],'School':[],'Area':[],'Faculty':[],'UrlProgram':"",'Material':{'Url':"",'ListOERs':[]},'Date':"",'ExtraData':[]}
     
     Oer = {'Text':"",'UrlOer':""}           #Diccionario de la lista OCW['Material']['ListOERs'] 
     
@@ -82,7 +89,8 @@ for page in pages:
         OCW['urlStatus']= False
         print page, " ",OCW['urlStatus']
         continue
-
+    print "URL> ",OCW['url']
+    OCW['Title'] = LimpiaText(soup.title.get_text())
     #Scrap Autores
     by = soup.select('div.objectMetadata')
     #Procesar texto de Autores  (elimina ':' ',')  
@@ -115,38 +123,36 @@ for page in pages:
     readPage = urlopen(OCW['Material']['Url']).read()       #Leer pagina de Materiales del Curso
     soupMat = BeautifulSoup(readPage)                       #crear estructura BS4
     cont = soupMat.select('div#region-content div.plain')   #busca OERs dentro
-    aa = cont[0].select('a')
-    latestOer = ""
-    for a in aa:
-        if latestOer != "" and latestOer == a.get('href'):
-            OCW['Material']['ListOERs'][len(OCW['Material']['ListOERs'])-1]['Text'] = QuitaSalto(a.get_text())
+    for a in cont[0].select('a'):
+        if len(OCW['Material']['ListOERs']) > 0 != None and OCW['Material']['ListOERs'][len(OCW['Material']['ListOERs'])-1]['UrlOer'] == a.get('href'):
+            OCW['Material']['ListOERs'][len(OCW['Material']['ListOERs'])-1]['Text'] = LimpiaText(a.get_text())
         else:
-            Oer['UrlOer']=QuitaSalto(a.get('href'))
-            Oer['Text']=QuitaSalto(a.get_text())
-            OCW['Material']['ListOERs'].append(Oer)
-            Oer = {'Text':"",'UrlOer':""} 
-        latestOer = a.get('href')
-
+            if CompruebaOer(a.get('href'), OCW['Material']['ListOERs']):
+                Oer['UrlOer']=a.get('href')
+                Oer['Text']=LimpiaText(a.get_text())
+                OCW['Material']['ListOERs'].append(Oer)
+                Oer = {'Text':"",'UrlOer':""} 
     #IMPRIMIR
-    print "> ",OCW['url']
-    """for d in OCW['Department']:
-        print "> ",d
+    
+    print "TL> ", OCW['Title']
+    for d in OCW['Department']:
+        print "DP> ",d
     for autor in OCW['Autor']:
-        print "> ",QuitaSalto(autor)
+        print "AU> ",LimpiaText(autor)
     for s in OCW['School']:
-        print "> ",s 
+        print "SH> ",s 
     for area in OCW['Area']:
-        print "> ",area 
+        print "AR> ",area 
     for f in OCW['Faculty']:
-        print "> ",f 
-    print "> ",OCW['UrlProgram']
-    print "> ",OCW['Material']['Url']
-    print "> ",OCW['Date']
+        print "FA> ",f 
+    print "UP> ",OCW['UrlProgram']
+    print "UM> ",OCW['Material']['Url']
+    print "FE> ",OCW['Date']
     for mat in OCW['Material']['ListOERs']:
         for ind in mat:
-            print ind , ": ", mat[ind]"""
+            print "  > ", ind , ": ", mat[ind]
 
 
     for ind in OCW['ExtraData']:
-        print "> ",ind
+        print "EX> ",ind
 
