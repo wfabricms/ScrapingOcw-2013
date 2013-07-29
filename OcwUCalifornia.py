@@ -71,12 +71,12 @@ def analiza(cadena):
 host = "" #"http://localhost/ocw/" 
 #paginas web
 pages = PagesUCalifornia
-pagesaux = ['http://ocwus.us.es/ciencias-y-tecnicas-historiograficas/archivistica-y-biblioteconomia']
+pagesaux = ['http://ocw.uci.edu/lectures/lecture.aspx?id=156']
 for page in pages:    
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
     ListaOcw = []
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
-    OCW = {'url':"",'urlStatus':True,'Title':"" ,'Department':"",'Author':"",'AutURL':"",'AutTitle':"",'Area':[],'Faculty':[],'UrlProgram':"",'Material':{'Url':"",'ListOERs':[]},'Date':"",'ExtraData':[]}
+    OCW = {'url':"",'urlStatus':True,'Title':"" ,'Department':"",'Author':"",'AutURL':"",'AutTitle':"",'VideoUrl':"",'VideoTitle':"",'Date':"",'BeginC':"",'ExtraData':[]}
     
     Auth = {'Name':"",'URL':""}
     Oer = {'Text':"",'UrlOer':""}           #Diccionario de la lista OCW['Material']['ListOERs'] 
@@ -97,101 +97,52 @@ for page in pages:
     OCW['Title'] = LimpiaText(soup.title.get_text())
     
     #Scrap Autores
+    if soup.select('div.columnleft_nomiddle blockquote table') != []:
+        data = soup.select('div.columnleft_nomiddle blockquote table')[0]
     
-    data = soup.select('div.columnleft_nomiddle blockquote table')[0]
-    
-    by = data.find(text=re.compile("Author")).parent.parent
-    if by == None: by = data.find(text=re.compile("author")).parent.parent
-    
-    
-    OCW['Author'] = LimpiaText(by.select('a')[0].get_text())
-    OCW['AutURL'] = by.select('a')[0].get('href')
-    
-    
-    title = data.find(text=re.compile("Title")).parent.parent
-    if title == None: title = data.find(text=re.compile("title")).parent.parent
-    
-    OCW['AutTitle'] = LimpiaText(title.get_text())
-    
-    Dept = data.find(text=re.compile("Department")).parent.parent
-    if Dept == None: Dept = data.find(text=re.compile("department")).parent.parent
-    
-    OCW['Department'] = LimpiaText(Dept.get_text())
-    
-    print OCW['Author']
-    print OCW['AutURL']
-    print OCW['AutTitle']
-    print OCW['Department']
-    print "\n"
-    
-    
-    
-    
-    #OCW['Autor'].append(by[0].get_text())
-    
-    
-    """#Procesar texto de Autores  (elimina ':' ',')  
-    autoresText = by[0].get_text()
-    aut = autoresText[(autoresText.index(':')+2):]
-    while ',' in aut:
-        OCW['Autor'].append(aut[:(aut.index(','))])
-        aut = aut[(aut.index(',')+2):]
-    OCW['Autor'].append(aut) 
-    
-    
-    
-    
-    data = soup.select('#aboutDeptInfo p')
-    if data == []:
-        data = soup.select('#aboutInfo p')   
-    for i in data:
-        textp = i.get_text()
-        index = 0
-        if '\n' in textp:
-            while '\n' in textp:
-                if analiza(textp[:textp.index('\n')]) != True:
-                    if len(textp[:textp.index('\n')]) > 3: OCW['ExtraData'].append(textp[:textp.index('\n')])
-                textp = textp[textp.index('\n')+1:]
-        if analiza(textp) != True:
-                if len(textp) > 3: OCW['ExtraData'].append(textp)
-    #Scrap URL Material y URL Programa
-    for i in soup.select('div#portlet-eduCommonsNavigation a'):
-        if "Material de clase" in i.get_text() or "Material del curso" in i.get_text() or "Material de Clase" in i.get_text():
-            OCW['Material']['Url'] = i.get('href')
-        if "Programa" in i.get_text():
-            OCW['UrlProgram'] = i.get('href')
-    readPage = urlopen(OCW['Material']['Url']).read()       #Leer pagina de Materiales del Curso
-    soupMat = BeautifulSoup(readPage)                       #crear estructura BS4
-    cont = soupMat.select('div#region-content div.plain')   #busca OERs dentro
-    for a in cont[0].select('a'):
-        if len(OCW['Material']['ListOERs']) > 0 != None and OCW['Material']['ListOERs'][len(OCW['Material']['ListOERs'])-1]['UrlOer'] == a.get('href'):
-            OCW['Material']['ListOERs'][len(OCW['Material']['ListOERs'])-1]['Text'] = LimpiaText(a.get_text())
+        by = data.find(text=re.compile("Author")).parent.parent
+        if by == None: by = data.find(text=re.compile("author")).parent.parent
+        
+        
+        OCW['Author'] = LimpiaText(by.select('a')[0].get_text())
+        OCW['AutURL'] = by.select('a')[0].get('href')
+        
+        
+        title = data.find(text=re.compile("Title")).parent.parent
+        if title == None: title = data.find(text=re.compile("title")).parent.parent
+        
+        OCW['AutTitle'] = LimpiaText(title.get_text())
+        
+        Dept = data.find(text=re.compile("Department")).parent.parent
+        if Dept == None: Dept = data.find(text=re.compile("department")).parent.parent
+        
+        OCW['Department'] = LimpiaText(Dept.get_text())
+
+    if soup.select('.columnleft_nomiddle p a') != []:
+        OCW['BeginC'] =  soup.select('.columnleft_nomiddle p a')[0].get('href')
+
+    if soup.select('#div.video iframe') != []:
+        OCW['VideoUrl'] = soup.select('#div.video iframe')[0].get('src')
+
+        if  OCW['VideoUrl'][0] =='/':
+            webVideo = urlopen("http://ocw.uci.edu/" + OCW['VideoUrl']).read()
         else:
-            if CompruebaOer(a.get('href'), OCW['Material']['ListOERs']):
-                Oer['UrlOer']=a.get('href')
-                Oer['Text'] = LimpiaText(a.get_text())
-                OCW['Material']['ListOERs'].append(Oer)
-                Oer = {'Text':"",'UrlOer':""} 
-    #IMPRIMIR
-    
-    print "TL> ", OCW['Title']
-    for d in OCW['Department']:
-        print "DP> ",d
+            webVideo = urlopen(OCW['VideoUrl']).read()
+        
+        soupvideo = BeautifulSoup(webVideo)
+        OCW['VideoTitle'] = soupvideo.title.get_text()
+    else:
+        OCW['VideoUrl']=""
+        OCW['VideoTitle']=""
 
-    for autor in OCW['Autor']:
-        print "AU> ",LimpiaText(autor)
-    for s in OCW['School']:
-        print "SH> ",s 
-    for area in OCW['Area']:
-        print "AR> ",area 
-    for f in OCW['Faculty']:
-        print "FA> ",f 
-    print "UP> ",OCW['UrlProgram']
-    print "UM> ",OCW['Material']['Url']
-    if OCW['Date'] != "":   print "FE> ",OCW['Date']
-    for mat in OCW['Material']['ListOERs']:
-        for ind in mat:
-            print "  > ", ind , ": ", mat[ind]
+    #print data.select('a')[a]get_text()
 
-    for ind in OCW['ExtraData']:
-        print "EX> ",ind"""
+    print "TL>",OCW['Title']
+    print "AU>",OCW['Author']
+    print "AL>",OCW['AutURL']
+    print "AT>",OCW['AutTitle']
+    print "DP>",OCW['Department']
+    print "VT>",OCW['VideoTitle']
+    print "VU>",OCW['VideoUrl']
+    print "BC>",OCW['BeginC']
+    print "\n"
