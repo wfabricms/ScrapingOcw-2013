@@ -70,9 +70,9 @@ def analiza(cadena):
 #Host
 host = "" #"http://localhost/ocw/" 
 #paginas web
-pages = pagesUSevilla
-pagasaux = ['http://ocwus.us.es/ciencias-y-tecnicas-historiograficas/archivistica-y-biblioteconomia']
-for page in pagasaux:    
+pages = PagesOpenU
+pagesaux = ['http://ocwus.us.es/ciencias-y-tecnicas-historiograficas/archivistica-y-biblioteconomia']
+for page in pages:    
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
     ListaOcw = []
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
@@ -84,22 +84,37 @@ for page in pagasaux:
         
     readPage = urlopen(page).read()         #Leer pagina
     soup = BeautifulSoup(readPage)          #crear estructura BS4
-    page_on = soup.find(text=re.compile("no existe en este servidor"))
+    page_on = soup.find(text=re.compile("tem requested could not be found"))
+    
+    
     if (page_on != None):
         OCW['urlStatus']= False
         print page, " ",OCW['urlStatus']
         continue
+        
+        
     print "URL> ",OCW['url']
     OCW['Title'] = LimpiaText(soup.title.get_text())
+    
+    
     #Scrap Autores
-    by = soup.select('div.objectMetadata')
-    #Procesar texto de Autores  (elimina ':' ',')  
+    by = soup.select('#summary_details .author_title a')
+    print by
+    
+    OCW['Autor'].append(by[0].get_text())
+    
+    
+    """#Procesar texto de Autores  (elimina ':' ',')  
     autoresText = by[0].get_text()
     aut = autoresText[(autoresText.index(':')+2):]
     while ',' in aut:
         OCW['Autor'].append(aut[:(aut.index(','))])
         aut = aut[(aut.index(',')+2):]
     OCW['Autor'].append(aut) 
+    
+    
+    
+    
     data = soup.select('#aboutDeptInfo p')
     if data == []:
         data = soup.select('#aboutInfo p')   
@@ -136,9 +151,10 @@ for page in pagasaux:
     print "TL> ", OCW['Title']
     for d in OCW['Department']:
         print "DP> ",d
+    """
     for autor in OCW['Autor']:
         print "AU> ",LimpiaText(autor)
-    for s in OCW['School']:
+    """for s in OCW['School']:
         print "SH> ",s 
     for area in OCW['Area']:
         print "AR> ",area 
@@ -152,4 +168,4 @@ for page in pagasaux:
             print "  > ", ind , ": ", mat[ind]
 
     for ind in OCW['ExtraData']:
-        print "EX> ",ind
+        print "EX> ",ind"""

@@ -972,9 +972,9 @@ PagesOpenU = [
 'http://openlearn.open.ac.uk/course/view.php?name=M248_1'
 ]
 
-#PÁGINAS DE UNIVERSIDAD DE CALIFORNIA
+#PÁGINAS DE UNIVERSIDAD DE CATALUÑA
 
-PagesUCalifornia = [
+PagesUCataluna = [
 'http://ocw.uci.edu/lectures/lecture.aspx?id=388',
 'http://ocw.uci.edu/lectures/lecture.aspx?id=389',
 'http://ocw.uci.edu/lectures/lecture.aspx?id=386',

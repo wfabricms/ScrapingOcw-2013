@@ -109,10 +109,10 @@ for page in pagasaux:
         if '\n' in textp:
             while '\n' in textp:
                 if analiza(textp[:textp.index('\n')]) != True:
-                    if len(textp[:textp.index('\n')]) > 3: OCW['ExtraData'].append(textp[:textp.index('\n')])
+                    if len(textp[:textp.index('\n')]) > 5: OCW['ExtraData'].append(textp[:textp.index('\n')])
                 textp = textp[textp.index('\n')+1:]
         if analiza(textp) != True:
-                if len(textp) > 3: OCW['ExtraData'].append(textp)
+                if len(textp) > 5: OCW['ExtraData'].append(textp)
     #Scrap URL Material y URL Programa
     for i in soup.select('div#portlet-eduCommonsNavigation a'):
         if "Material de clase" in i.get_text() or "Material del curso" in i.get_text() or "Material de Clase" in i.get_text():

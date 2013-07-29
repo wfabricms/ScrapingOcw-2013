@@ -23,12 +23,12 @@ def CompruebaOer(UrlOer, ListOERs ):
 
 def LimpiaText(cadena):
     if cadena != None and len(cadena) > 2:
+        while '\r' in cadena:
+            cadena = cadena[:(cadena.index('\r'))] + cadena[(cadena.index('\r'))+1:]
         while '\n' in cadena:
             cadena = cadena[:(cadena.index('\n'))] + cadena[(cadena.index('\n'))+1:]
-        
         while '  ' in cadena:
             cadena = cadena[:(cadena.index('  '))] + cadena[(cadena.index('  '))+1:]
-        
         if ' ' in cadena[0] or '\n' in cadena[0]:
             cadena = cadena[1:]
 
@@ -70,36 +70,77 @@ def analiza(cadena):
 #Host
 host = "" #"http://localhost/ocw/" 
 #paginas web
-pages = pagesUSevilla
-pagasaux = ['http://ocwus.us.es/ciencias-y-tecnicas-historiograficas/archivistica-y-biblioteconomia']
-for page in pagasaux:    
+pages = PagesUCalifornia
+pagesaux = ['http://ocwus.us.es/ciencias-y-tecnicas-historiograficas/archivistica-y-biblioteconomia']
+for page in pages:    
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
     ListaOcw = []
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
-    OCW = {'url':"",'urlStatus':True,'Title':"" ,'Department':[],'Autor':[],'School':[],'Area':[],'Faculty':[],'UrlProgram':"",'Material':{'Url':"",'ListOERs':[]},'Date':"",'ExtraData':[]}
+    OCW = {'url':"",'urlStatus':True,'Title':"" ,'Department':"",'Author':"",'AutURL':"",'AutTitle':"",'Area':[],'Faculty':[],'UrlProgram':"",'Material':{'Url':"",'ListOERs':[]},'Date':"",'ExtraData':[]}
     
+    Auth = {'Name':"",'URL':""}
     Oer = {'Text':"",'UrlOer':""}           #Diccionario de la lista OCW['Material']['ListOERs'] 
     
     OCW['url'] = page
         
     readPage = urlopen(page).read()         #Leer pagina
     soup = BeautifulSoup(readPage)          #crear estructura BS4
-    page_on = soup.find(text=re.compile("no existe en este servidor"))
+    page_on = soup.find(text=re.compile("o matches were found for your search crite"))
+    
+    
     if (page_on != None):
         OCW['urlStatus']= False
         print page, " ",OCW['urlStatus']
         continue
+                
     print "URL> ",OCW['url']
     OCW['Title'] = LimpiaText(soup.title.get_text())
+    
     #Scrap Autores
-    by = soup.select('div.objectMetadata')
-    #Procesar texto de Autores  (elimina ':' ',')  
+    
+    data = soup.select('div.columnleft_nomiddle blockquote table')[0]
+    
+    by = data.find(text=re.compile("Author")).parent.parent
+    if by == None: by = data.find(text=re.compile("author")).parent.parent
+    
+    
+    OCW['Author'] = LimpiaText(by.select('a')[0].get_text())
+    OCW['AutURL'] = by.select('a')[0].get('href')
+    
+    
+    title = data.find(text=re.compile("Title")).parent.parent
+    if title == None: title = data.find(text=re.compile("title")).parent.parent
+    
+    OCW['AutTitle'] = LimpiaText(title.get_text())
+    
+    Dept = data.find(text=re.compile("Department")).parent.parent
+    if title == None: Dept = data.find(text=re.compile("department")).parent.parent
+    
+    OCW['Department'] = LimpiaText(title.get_text())
+    
+    print OCW['Author']
+    print OCW['AutURL']
+    print OCW['AutTitle']
+    print OCW['Department']
+    print "\n"
+    
+    
+    
+    
+    #OCW['Autor'].append(by[0].get_text())
+    
+    
+    """#Procesar texto de Autores  (elimina ':' ',')  
     autoresText = by[0].get_text()
     aut = autoresText[(autoresText.index(':')+2):]
     while ',' in aut:
         OCW['Autor'].append(aut[:(aut.index(','))])
         aut = aut[(aut.index(',')+2):]
     OCW['Autor'].append(aut) 
+    
+    
+    
+    
     data = soup.select('#aboutDeptInfo p')
     if data == []:
         data = soup.select('#aboutInfo p')   
@@ -136,6 +177,7 @@ for page in pagasaux:
     print "TL> ", OCW['Title']
     for d in OCW['Department']:
         print "DP> ",d
+
     for autor in OCW['Autor']:
         print "AU> ",LimpiaText(autor)
     for s in OCW['School']:
@@ -152,4 +194,4 @@ for page in pagasaux:
             print "  > ", ind , ": ", mat[ind]
 
     for ind in OCW['ExtraData']:
-        print "EX> ",ind
+        print "EX> ",ind"""
