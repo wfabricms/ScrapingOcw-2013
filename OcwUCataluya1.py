@@ -22,13 +22,12 @@ def CompruebaOer(UrlOer, ListOERs ):
     return True #DEVUELVE FALSO EN CASO DE QUE EL OER NO EXISTA EN LISTA PARA SER INSERTADO
 
 def LimpiaText(cadena):
+    CaractBorrar = ['\r','\n','  ','\t',]
     if cadena != None and len(cadena) > 2:
-        while '\r' in cadena:
-            cadena = cadena[:(cadena.index('\r'))] + cadena[(cadena.index('\r'))+1:]
-        while '\n' in cadena:
-            cadena = cadena[:(cadena.index('\n'))] + cadena[(cadena.index('\n'))+1:]
-        while '  ' in cadena:
-            cadena = cadena[:(cadena.index('  '))] + cadena[(cadena.index('  '))+1:]
+        for caract in CaractBorrar:
+            while caract in cadena:
+                cadena = cadena[:(cadena.index(caract))] + cadena[(cadena.index(caract))+1:]
+
         if ' ' in cadena[0] or '\n' in cadena[0]:
             cadena = cadena[1:]
 
@@ -76,7 +75,7 @@ for page in pages:
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
     ListaOcw = []
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
-    OCW = {'url':"",'urlStatus':True,'Title':"" ,'Department':"",'MainProfesor':[],'Profesores':[],'AutURL':"",'AutTitle':"",'VideoUrl':"",'VideoTitle':"",'Date':"",'BeginC':"",'ExtraData':[]}
+    OCW = {'url':"",'urlStatus':True,'Title':"" ,'Department':"",'MainProfesor':[],'Profesores':[],'Date':"",'Credits':"",'Lenguages':[],'ExtraData':[]}
     
     Auth = {'Name':"",'URL':""}
     Oer = {'Text':"",'UrlOer':""}           #Diccionario de la lista OCW['Material']['ListOERs'] 
@@ -101,12 +100,32 @@ for page in pages:
     data1 = soup.select('div.span-20.last.prepend-1 div.span-11.last ul')
     for li in data1[0].select('li'):
         OCW['MainProfesor'].append(LimpiaText(li.get_text()))
+
+    for li in data1[1].select('li'):
+        OCW['Profesores'].append(LimpiaText(li.get_text()))
+
+    data1 = soup.select('div.span-20.last.prepend-1 div.span-11.last')[0]
+    OCW['Credits'] = data1.find(text=re.compile('ditos:'))
+    lengs = LimpiaText(data1.find(text=re.compile(' en que se imparte')).parent.next_sibling.next_sibling.get_text())
+
+    while ';' in lengs:
+        lengs =
+
+    OCW['Lenguages'].append(LimpiaText(data1.find(text=re.compile(' en que se imparte')).parent.next_sibling.next_sibling.get_text()))
+
+    for l in OCW['Lenguages']:
+        print LimpiaText(l)
     
-    for p in OCW['MainProfesor']:
-        print p
+    """for p in OCW['MainProfesor']:
+        print "MP",p
+
+    for p in OCW['Profesores']:
+        print "SP",p
+
+    print OCW['Credits']
         
     print "\n"
-    
+    """
     
     """
     if soup.select('div.columnleft_nomiddle blockquote table') != []:
