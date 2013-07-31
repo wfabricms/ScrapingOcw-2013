@@ -27,12 +27,12 @@ def LimpiaText(cadena):
         for caract in CaractBorrar:
             while caract in cadena:
                 cadena = cadena[:(cadena.index(caract))] + cadena[(cadena.index(caract))+1:]
+        if len(cadena)>2:
+            if ' ' in cadena[0] or '\n' in cadena[0]:
+                cadena = cadena[1:]
 
-        if ' ' in cadena[0] or '\n' in cadena[0]:
-            cadena = cadena[1:]
-
-        if ' ' in cadena[len(cadena)-1] or '\n' in cadena[len(cadena)-1]:
-            cadena = cadena[:-1]
+            if ' ' in cadena[len(cadena)-1] or '\n' in cadena[len(cadena)-1]:
+                cadena = cadena[:-1]
 
     return cadena
 
@@ -70,12 +70,12 @@ def analiza(cadena):
 host = "" #"http://localhost/ocw/" 
 #paginas web
 pages = PagesUCataluya1
-pagesaux = ['http://ocw.camins.upc.edu/ocw/home.htm?execution=e11s1']
+pagesaux = ['http://ocw.camins.upc.edu/ocw/home.htm?p_codiUpcUd=250144&p_idIdioma=2']
 for page in pages:    
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
     ListaOcw = []
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
-    OCW = {'url':"",'urlStatus':True,'Title':"" ,'Department':"",'MainProfesor':[],'Profesores':[],'Date':"",'Credits':"",'Lenguages':[],'ExtraData':[]}
+    OCW = {'url':"",'urlStatus':True,'Title':"" ,'Department':[],'MainProfesor':[],'Profesores':[],'Date':"",'Credits':"",'Lenguages':[],'ExtraData':[]}
     
     Auth = {'Name':"",'URL':""}
     Oer = {'Text':"",'UrlOer':""}           #Diccionario de la lista OCW['Material']['ListOERs'] 
@@ -104,28 +104,39 @@ for page in pages:
     for li in data1[1].select('li'):
         OCW['Profesores'].append(LimpiaText(li.get_text()))
 
-    data1 = soup.select('div.span-20.last.prepend-1 div.span-11.last')[0]
+    data1 = soup.select('div.span-20.last.prepend-1')[0]
     OCW['Credits'] = data1.find(text=re.compile('ditos:'))
     lengs = LimpiaText(data1.find(text=re.compile(' en que se imparte')).parent.next_sibling.next_sibling.get_text())
 
     while ';' in lengs:
-        lengs =
+        OCW['Lenguages'].append(lengs[:lengs.index(';')])
+        lengs = lengs[lengs.index(';')+1:]
+    if len(lengs) > 1: OCW['Lenguages'].append(lengs)
 
-    OCW['Lenguages'].append(LimpiaText(data1.find(text=re.compile(' en que se imparte')).parent.next_sibling.next_sibling.get_text()))
-
-    for l in OCW['Lenguages']:
-        print LimpiaText(l)
+    data1 = soup.select('div.span-20.last.prepend-1')[0]
+    deps = data1.find(text=re.compile('epartamento')).parent.next_sibling.next_sibling.get_text()
     
-    """for p in OCW['MainProfesor']:
+    while '\n' in deps:
+        if len(LimpiaText(deps[:deps.index('\n')]))>5: OCW['Department'].append(LimpiaText(deps[:deps.index('\n')]))
+        deps = deps[deps.index('\n')+1:]
+    if len(LimpiaText(deps)) > 5: OCW['Department'].append(LimpiaText(deps))
+    
+    for d in OCW['Department']:
+        print "DP>",d
+    """
+    for l in OCW['Lenguages']:
+        print "LG>",l
+
+    for p in OCW['MainProfesor']:
         print "MP",p
 
     for p in OCW['Profesores']:
         print "SP",p
 
     print OCW['Credits']
-        
-    print "\n"
-    """
+    """    
+    print ""
+    
     
     """
     if soup.select('div.columnleft_nomiddle blockquote table') != []:
