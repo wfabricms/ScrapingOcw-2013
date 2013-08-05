@@ -71,8 +71,8 @@ def analiza(cadena):
 host = "" #"http://localhost/ocw/" 
 #paginas web
 pages = pagesUSevilla
-pagasaux = ['http://ocwus.us.es/ciencias-y-tecnicas-historiograficas/archivistica-y-biblioteconomia']
-for page in pagasaux:    
+pagesaux = ['http://ocwus.us.es/ciencias-y-tecnicas-historiograficas/archivistica-y-biblioteconomia']
+for page in pages:    
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
     ListaOcw = []
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
@@ -133,23 +133,25 @@ for page in pagasaux:
                 Oer = {'Text':"",'UrlOer':""} 
     #IMPRIMIR
     
-    print "TL> ", OCW['Title']
+    print "TTL> ", OCW['Title']
     for d in OCW['Department']:
-        print "DP> ",d
+        print "DPT> ",d
     for autor in OCW['Autor']:
-        print "AU> ",LimpiaText(autor)
+        print "AUT> ",LimpiaText(autor)
     for s in OCW['School']:
-        print "SH> ",s 
+        print "SCH> ",s 
     for area in OCW['Area']:
-        print "AR> ",area 
+        print "ARE> ",area 
     for f in OCW['Faculty']:
         print "FA> ",f 
-    print "UP> ",OCW['UrlProgram']
-    print "UM> ",OCW['Material']['Url']
-    if OCW['Date'] != "":   print "FE> ",OCW['Date']
-    for mat in OCW['Material']['ListOERs']:
-        for ind in mat:
-            print "  > ", ind , ": ", mat[ind]
+    print "UPR> ",OCW['UrlProgram']
+    print "UMT> ",OCW['Material']['Url']
+    if OCW['Date'] != "":   print "FCH> ",OCW['Date']
+    for i in OCW['Material']['ListOERs']:
+        print "*OERT>",i['Text']
+        print "*OERU>",i['UrlOer']
+        print ""
 
     for ind in OCW['ExtraData']:
-        print "EX> ",ind
+        print "EXT> ",ind
+    print "\n"
