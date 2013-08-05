@@ -35,7 +35,7 @@ def LimpiaText(cadena):
 
     return cadena
 
-def analiza(cadena):
+def analiza(cadena): 
     if len(cadena) > 0:
         if (cadena[0] == '\n'): 
             cadena == cadena[1:]

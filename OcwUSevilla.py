@@ -22,20 +22,17 @@ def CompruebaOer(UrlOer, ListOERs ):
     return True #DEVUELVE FALSO EN CASO DE QUE EL OER NO EXISTA EN LISTA PARA SER INSERTADO
 
 def LimpiaText(cadena):
+    CaractBorrar = ['\r','\n','  ','\t',]
     if cadena != None and len(cadena) > 2:
-        while '\n' in cadena:
-            cadena = cadena[:(cadena.index('\n'))] + cadena[(cadena.index('\n'))+1:]
-        
-        while '  ' in cadena:
-            cadena = cadena[:(cadena.index('  '))] + cadena[(cadena.index('  '))+1:]
-        
-        if ' ' in cadena[0] or '\n' in cadena[0]:
-            cadena = cadena[1:]
+        for caract in CaractBorrar:
+            while caract in cadena:
+                cadena = cadena[:(cadena.index(caract))] + cadena[(cadena.index(caract))+1:]
+        if len(cadena)>2:
+            if ' ' in cadena[0] or '\n' in cadena[0]:
+                cadena = cadena[1:]
 
-        if ' ' in cadena[len(cadena)-1] or '\n' in cadena[len(cadena)-1]:
-            cadena = cadena[:-1]
-
-    return cadena
+            if ' ' in cadena[len(cadena)-1] or '\n' in cadena[len(cadena)-1]:
+                cadena = cadena[:-1]
 
 def analiza(cadena):
     if len(cadena) > 0:
@@ -109,10 +106,10 @@ for page in pages:
         if '\n' in textp:
             while '\n' in textp:
                 if analiza(textp[:textp.index('\n')]) != True:
-                    if len(textp[:textp.index('\n')]) > 3: OCW['ExtraData'].append(textp[:textp.index('\n')])
+                    if len(LimpiaText(textp[:textp.index('\n')])) > 3: OCW['ExtraData'].append(LimpiaText(textp[:textp.index('\n')]))
                 textp = textp[textp.index('\n')+1:]
         if analiza(textp) != True:
-                if len(textp) > 3: OCW['ExtraData'].append(textp)
+                if len(LimpiaText(textp)) > 3: OCW['ExtraData'].append(LimpiaText(textp))
     #Scrap URL Material y URL Programa
     for i in soup.select('div#portlet-eduCommonsNavigation a'):
         if "Material de clase" in i.get_text() or "Material del curso" in i.get_text() or "Material de Clase" in i.get_text():

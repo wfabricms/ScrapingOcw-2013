@@ -22,18 +22,17 @@ def CompruebaOer(UrlOer, ListOERs ):
     return True #DEVUELVE FALSO EN CASO DE QUE EL OER NO EXISTA EN LISTA PARA SER INSERTADO
 
 def LimpiaText(cadena):
+    CaractBorrar = ['\r','\n','  ','\t',]
     if cadena != None and len(cadena) > 2:
-        while '\r' in cadena:
-            cadena = cadena[:(cadena.index('\r'))] + cadena[(cadena.index('\r'))+1:]
-        while '\n' in cadena:
-            cadena = cadena[:(cadena.index('\n'))] + cadena[(cadena.index('\n'))+1:]
-        while '  ' in cadena:
-            cadena = cadena[:(cadena.index('  '))] + cadena[(cadena.index('  '))+1:]
-        if ' ' in cadena[0] or '\n' in cadena[0]:
-            cadena = cadena[1:]
+        for caract in CaractBorrar:
+            while caract in cadena:
+                cadena = cadena[:(cadena.index(caract))] + cadena[(cadena.index(caract))+1:]
+        if len(cadena)>2:
+            if ' ' in cadena[0] or '\n' in cadena[0]:
+                cadena = cadena[1:]
 
-        if ' ' in cadena[len(cadena)-1] or '\n' in cadena[len(cadena)-1]:
-            cadena = cadena[:-1]
+            if ' ' in cadena[len(cadena)-1] or '\n' in cadena[len(cadena)-1]:
+                cadena = cadena[:-1]
 
     return cadena
 
