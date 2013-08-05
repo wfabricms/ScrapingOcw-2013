@@ -70,12 +70,12 @@ def analiza(cadena):
 host = "" #"http://localhost/ocw/" 
 #paginas web
 pages = PagesUCataluya1
-pagesaux = ['http://ocw.camins.upc.edu/ocw/home.htm?p_codiUpcUd=250144&p_idIdioma=2']
+pagesaux = ['http://ocw.camins.upc.edu/ocw/home.htm?p_codiUpcUd=250233&p_idIdioma=2']
 for page in pages:    
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
     ListaOcw = []
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
-    OCW = {'url':"",'urlStatus':True,'Title':"" ,'Department':[],'MainProfesor':[],'Profesores':[],'Date':"",'Credits':"",'Lenguages':[],'ExtraData':[]}
+    OCW = {'url':"",'urlStatus':True,'Title':"" ,'Department':[],'MainProfesor':[],'Profesores':[],'Date':"",'Credits':"",'Lenguages':[],"Titulaciones":[],"Description":"",'ExtraData':[]}
     
     Auth = {'Name':"",'URL':""}
     Oer = {'Text':"",'UrlOer':""}           #Diccionario de la lista OCW['Material']['ListOERs'] 
@@ -106,14 +106,14 @@ for page in pages:
 
     data1 = soup.select('div.span-20.last.prepend-1')[0]
     OCW['Credits'] = data1.find(text=re.compile('ditos:'))
+    
     lengs = LimpiaText(data1.find(text=re.compile(' en que se imparte')).parent.next_sibling.next_sibling.get_text())
 
     while ';' in lengs:
         OCW['Lenguages'].append(lengs[:lengs.index(';')])
         lengs = lengs[lengs.index(';')+1:]
     if len(lengs) > 1: OCW['Lenguages'].append(lengs)
-
-    data1 = soup.select('div.span-20.last.prepend-1')[0]
+    
     deps = data1.find(text=re.compile('epartamento')).parent.next_sibling.next_sibling.get_text()
     
     while '\n' in deps:
@@ -121,20 +121,30 @@ for page in pages:
         deps = deps[deps.index('\n')+1:]
     if len(LimpiaText(deps)) > 5: OCW['Department'].append(LimpiaText(deps))
     
-    for d in OCW['Department']:
-        print "DP>",d
-    """
+    titu = data1.find(text=re.compile('itulacion')).parent.next_sibling.next_sibling.get_text()
+    
+    while '\n' in titu:
+        if len(LimpiaText(titu[:titu.index('\n')]))>5: OCW['Titulaciones'].append(LimpiaText(titu[:titu.index('\n')]))
+        titu = titu[titu.index('\n')+1:]
+    if len(LimpiaText(titu)) > 5: OCW['Titulaciones'].append(LimpiaText(titu))
+    
+    if data1.find(text=re.compile('escripc')) != None: OCW['Description'] = LimpiaText(data1.find(text=re.compile('escripc')).parent.next_sibling.next_sibling.get_text())
+    
+    
+    print "TL>", OCW['Title']
+    for p in OCW['MainProfesor']:
+        print "MP>",p
+    for p in OCW['Profesores']:
+        print "SP>",p
+    print OCW['Credits']
     for l in OCW['Lenguages']:
         print "LG>",l
 
-    for p in OCW['MainProfesor']:
-        print "MP",p
-
-    for p in OCW['Profesores']:
-        print "SP",p
-
-    print OCW['Credits']
-    """    
+    for t in OCW['Titulaciones']:
+        print "TI>",t
+    for d in OCW['Department']:
+        print "DP>",d
+    print "DS>", OCW['Description']    
     print ""
     
     
