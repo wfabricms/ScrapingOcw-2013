@@ -141,7 +141,7 @@ for page in pages:
         print "LG>",l
 
     for t in OCW['Titulaciones']:
-        print "TI>",d
+        print "TI>",t
     for d in OCW['Department']:
         print "DP>",d
     print "DS>", OCW['Description']    
