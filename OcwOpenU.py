@@ -95,10 +95,10 @@ for page in pages:
     for a in data:
        print "MENU>", LimpiaText(a.get_text())
 
-    """print "TIL>", OCW['Title']
+    print "TIL>", OCW['Title']
     for a in OCW['Autor']:
         print "AUT>", a
     print "DUR>", OCW['Duration']
     print "LEV>", OCW['Level']
-    print "DAT>", OCW['Date']"""
+    print "DAT>", OCW['Date']
     print ""

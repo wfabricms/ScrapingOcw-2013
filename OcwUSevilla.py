@@ -106,10 +106,10 @@ for page in pages:
         if '\n' in textp:
             while '\n' in textp:
                 if analiza(textp[:textp.index('\n')]) != True:
-                    if len(LimpiaText(textp[:textp.index('\n')])) > 3: OCW['ExtraData'].append(LimpiaText(textp[:textp.index('\n')]))
+                    if len(textp[:textp.index('\n')]) > 3: OCW['ExtraData'].append(textp[:textp.index('\n')])
                 textp = textp[textp.index('\n')+1:]
         if analiza(textp) != True:
-                if len(LimpiaText(textp)) > 3: OCW['ExtraData'].append(LimpiaText(textp))
+                if len(textp) > 3: OCW['ExtraData'].append(LimpiaText(textp))
     #Scrap URL Material y URL Programa
     for i in soup.select('div#portlet-eduCommonsNavigation a'):
         if "Material de clase" in i.get_text() or "Material del curso" in i.get_text() or "Material de Clase" in i.get_text():
@@ -121,11 +121,11 @@ for page in pages:
     cont = soupMat.select('div#region-content div.plain')   #busca OERs dentro
     for a in cont[0].select('a'):
         if len(OCW['Material']['ListOERs']) > 0 != None and OCW['Material']['ListOERs'][len(OCW['Material']['ListOERs'])-1]['UrlOer'] == a.get('href'):
-            OCW['Material']['ListOERs'][len(OCW['Material']['ListOERs'])-1]['Text'] = LimpiaText(a.get_text())
+            OCW['Material']['ListOERs'][len(OCW['Material']['ListOERs'])-1]['Text'] = a.get_text()
         else:
             if CompruebaOer(a.get('href'), OCW['Material']['ListOERs']):
                 Oer['UrlOer']=a.get('href')
-                Oer['Text'] = LimpiaText(a.get_text())
+                Oer['Text'] = a.get_text()
                 OCW['Material']['ListOERs'].append(Oer)
                 Oer = {'Text':"",'UrlOer':""} 
     #IMPRIMIR

@@ -75,11 +75,21 @@ def Analiza(cadena):
                 return True            
             
     return False
-       
-#Host
-host = "" #"http://localhost/ocw/" 
+      
+def GetHost(url):
+    indice = 0
+    indSlash = 0
+    for u in url:
+        indSlash = indSlash +1
+        if u == '/':
+            indice = indice + 1
+            if indice == 3:
+                return url[:indSlash-1]
+
+
 #paginas web
 pages = PagesUCataluya2
+host = GetHost(pages[1])
 pagesaux = ['http://ocw.camins.upc.edu/ocw/home.htm?p_codiUpcUd=250233&p_idIdioma=2']
 for page in pages:    
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
@@ -87,7 +97,7 @@ for page in pages:
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
     OCW = {'url':"",'urlStatus':True,'TitlePage':"",'TitleOCW':"",'Coordinador':[],'Profesores':[],'Any':"",'Lenguages':[],"Code":[],"type":[],'UrlAsigAccess':"",'Materiales':[],'ExtraData':[]}
     
-    OerMater = {'Text':"",'UrlOer':""}           #Diccionario de la lista OCW['Material']['ListOERs'] 
+    OerMenuMateriales = {'Text':"",'Url':""}           #Diccionario de la lista OCW['Material']['ListOERs'] 
     
     OCW['url'] = page
         
@@ -116,20 +126,27 @@ for page in pages:
     datMenu = soup.select('#block-ocw-0 div div')[0]
     datMater = datMenu.find(text=re.compile("Materials del curs")).parent.next_sibling('li')
     for li in datMater:
-        OerMater['Text'] = li.a.get_text()
-        OerMater['UrlOer'] = li.a.get('href')
-        OCW['Materiales'].append(OerMater)
+        OerMenuMateriales['Text'] = li.a.get_text()
+        if li.a.get('href')[0] == '/':
+            OerMenuMateriales['Url'] = host + li.a.get('href')
+        else:
+            OerMenuMateriales['Url'] = li.a.get('href')
+
+
+        OCW['Materiales'].append(OerMenuMateriales)
          
     for m in OCW['Materiales']:
-        if 'Apunts' in m['Text']:
-            print "APUNTS "
-            webB = urlopen(page + 'Apunts').read()
-            soupApunts = BeautifulSoup(webB)
-        print m['Text'], " > ",m['UrlOer']
-    
+        print "MENUText>",m['Text']
+        print "MENUurl>",m['Url']
+        webB = urlopen(m['Url'].encode('utf-8')).read()
+        soupMenu = BeautifulSoup(webB)
+        """if dataMenu = soupMenu.select('#content-content')[0].select('.view-content') != None:
+            dataMenu = soupMenu.select('#content-content')[0].select('.view-content')[0]"""
+
+
     print ""
 
-    """print "TLE>", OCW['TitlePage']
+    print "TLE>", OCW['TitlePage']
     print "TLO>", OCW['titleOCW']
     if OCW['Any'] != "": print "ANY>", OCW['Any']
 
@@ -147,4 +164,4 @@ for page in pages:
     print "ACC>", OCW['UrlAsigAccess']    
     for p in OCW['ExtraData']:
         print "EXT>",p
-    print """
+    print 
