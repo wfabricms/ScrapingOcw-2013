@@ -90,14 +90,15 @@ def GetHost(url):
 #paginas web
 pages = PagesUCataluya2
 host = GetHost(pages[1])
-pagesaux = ['http://ocw.camins.upc.edu/ocw/home.htm?p_codiUpcUd=250233&p_idIdioma=2']
+pagesaux = ['http://ocw.upc.edu/curs/27341/Audiovisuals']
 for page in pages:    
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
     ListaOcw = []
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
-    OCW = {'url':"",'urlStatus':True,'TitlePage':"",'TitleOCW':"",'Coordinador':[],'Profesores':[],'Any':"",'Lenguages':[],"Code":[],"type":[],'UrlAsigAccess':"",'Materiales':[],'ExtraData':[]}
+    OCW = {'url':"",'urlStatus':True,'TitlePage':"",'TitleOCW':"",'Coordinador':[],'Profesores':[],'Any':"",'Lenguages':[],"Code":[],"type":[],'UrlAsigAccess':"",'OERS':[],'ExtraData':[]}
     
-    OerMenuMateriales = {'Text':"",'Url':""}           #Diccionario de la lista OCW['Material']['ListOERs'] 
+    OerMenuMateriales = {'Text':"",'Url':"",'ListOERs':[]}           
+    OersData = {'titleOer':"",'AuthorOer':"",'DateOer':"",'UrlOer':""}
     
     OCW['url'] = page
         
@@ -125,27 +126,48 @@ for page in pages:
     OCW['UrlAsigAccess'] = data1.find(text=re.compile("s de la assignatura")).parent.get('href')
     datMenu = soup.select('#block-ocw-0 div div')[0]
     datMater = datMenu.find(text=re.compile("Materials del curs")).parent.next_sibling('li')
+    
+
     for li in datMater:
         OerMenuMateriales['Text'] = li.a.get_text()
         if li.a.get('href')[0] == '/':
             OerMenuMateriales['Url'] = host + li.a.get('href')
         else:
             OerMenuMateriales['Url'] = li.a.get('href')
+        OCW['OERS'].append(OerMenuMateriales)
+        OerMenuMateriales = {'Text':"",'Url':""}    
 
-
-        OCW['Materiales'].append(OerMenuMateriales)
-         
-    for m in OCW['Materiales']:
+    for m in OCW['OERS']:
+        print ""
         print "MENUText>",m['Text']
         print "MENUurl>",m['Url']
         webB = urlopen(m['Url'].encode('utf-8')).read()
         soupMenu = BeautifulSoup(webB)
-        """if dataMenu = soupMenu.select('#content-content')[0].select('.view-content') != None:
-            dataMenu = soupMenu.select('#content-content')[0].select('.view-content')[0]"""
+        if soupMenu.select('#content-content')[0].select('.view-content') != None:
+            dataMenu = soupMenu.select('#content-content')[0].select('.view-content')[1].select('table')
+            for t in dataMenu:
+                 print t.caption.get_text()
+                 for tr in t.tbody.select('tr'):
+                    if tr.find(text=re.compile("tol")) != None: 
+                        OersData['titleOer'] = tr.find(text=re.compile("tol")).parent.next_sibling.get_text()
+                        print "TITLE-OERS>", OersData['titleOer']
+
+                    if tr.find(text=re.compile("Autor")) != None:
+                        OersData['AuthorOer'] = tr.find(text=re.compile("Autor")).parent.next_sibling.get_text()
+                        print "AUTHOR-ORER>", OersData['AuthorOer']
+
+                    if tr.find(text=re.compile("Data")) != None:
+                        OersData['DateOer'] = tr.find(text=re.compile("Data")).parent.next_sibling.get_text()
+                        print "DATE-OER>", OersData['DateOer']
+
+                    if tr.find(text=re.compile("URL")) != None:
+                        OersData['UrlOer'] = tr.find(text=re.compile("URL")).parent.next_sibling.get_text()
+                        print "URL-OER>", OersData['UrlOer']
+                    print ""
 
 
-    print ""
-
+   
+    """
     print "TLE>", OCW['TitlePage']
     print "TLO>", OCW['titleOCW']
     if OCW['Any'] != "": print "ANY>", OCW['Any']
@@ -163,5 +185,5 @@ for page in pages:
 
     print "ACC>", OCW['UrlAsigAccess']    
     for p in OCW['ExtraData']:
-        print "EXT>",p
-    print 
+        print "EXT>",p """
+    print "·················##########################·················##########################·················##########################·················##########################\n \n"
