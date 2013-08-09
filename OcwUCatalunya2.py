@@ -90,8 +90,8 @@ def GetHost(url):
 #paginas web
 pages = PagesUCataluya2
 host = GetHost(pages[1])
-pagesaux = ['http://ocw.upc.edu/curs/27341/Audiovisuals']
-for page in pages:    
+pagesaux = ['http://ocw.upc.edu/curs/26143/Pràctiques']
+for page in pagesaux:    
     #LISTA PRINCIPAL [{OCW},{OCW},{OCW},{OCW}]
     ListaOcw = []
     #DICCIONARIO DE CADA OCW {'Url':www, 'Title': TituOcw}
@@ -163,7 +163,14 @@ for page in pages:
                     if tr.find(text=re.compile("URL")) != None:
                         OersData['UrlOer'] = tr.find(text=re.compile("URL")).parent.next_sibling.get_text()
                         print "URL-OER>", OersData['UrlOer']
+
+                    print "URL-OER>", OersData['UrlOer']
+                    
+                    if OersData['UrlOer'] == "" and OersData['UrlOer'] == tr.select('p a') != None:
+                        OersData['UrlOer'] = tr.select('p a')[0].get('href')
+                        print "URL-OER>", OersData['UrlOer']
                     print ""
+                    OersData = {'titleOer':"",'AuthorOer':"",'DateOer':"",'UrlOer':""}
 
 
    
